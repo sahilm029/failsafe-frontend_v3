@@ -79,7 +79,7 @@ export default function LogsPage({
   return (
     <div className="h-full flex flex-col">
       {/* Stats Bar */}
-      <div className="px-6 py-3 border-b border-border bg-card flex items-center gap-6">
+      <div className="px-4 sm:px-6 py-3 border-b border-border bg-card flex flex-wrap items-center gap-4 md:gap-6">
         <div>
           <span className="text-xs text-text-muted">Total</span>
           <span className="ml-2 text-sm font-medium text-text-primary">{totalCount}</span>
@@ -99,7 +99,7 @@ export default function LogsPage({
       </div>
 
       {/* Filters Bar */}
-      <div className="px-6 py-4 border-b border-border bg-surface sticky top-0 z-10">
+      <div className="px-4 sm:px-6 py-4 border-b border-border bg-surface sticky top-0 z-10 w-full overflow-x-auto">
         <div className="flex flex-wrap items-center gap-4">
           {/* Level Filters */}
           <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export default function LogsPage({
             <p className="text-text-muted">No logs found</p>
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="sticky top-0 bg-surface">
               <tr className="border-b border-border">
                 <th className="text-left px-4 py-2 text-xs font-medium text-text-secondary w-28">Time</th>
@@ -183,7 +183,7 @@ export default function LogsPage({
 
       {/* Pagination */}
       {totalCount > 100 && (
-        <div className="px-6 py-3 border-t border-border bg-card flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 border-t border-border bg-card flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <span className="text-sm text-text-muted">
             Page {page} of {Math.ceil(totalCount / 100)}
           </span>

@@ -151,7 +151,7 @@ export default function TestsPage({
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-text-primary">Tests</h1>
@@ -512,13 +512,13 @@ function CreateTestPanel({ projectId }: { projectId: string }) {
       {/* Split Panel */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* LEFT PANEL - Form (55%) */}
-        <div className="flex-1 lg:w-[55%] bg-card rounded-lg border border-border p-6 space-y-6">
+        <div className="flex-1 lg:w-[55%] bg-card rounded-lg border border-border p-4 sm:p-6 space-y-6">
           {/* Step 1: Target System */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-3">
               Step 1 — Target System
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {(["backend", "frontend", "android"] as TargetType[]).map((t) => (
                 <button
                   key={t}
@@ -547,7 +547,7 @@ function CreateTestPanel({ projectId }: { projectId: string }) {
               <label className="block text-sm font-medium text-text-secondary mb-3">
                 Step 2 — Fault Type
               </label>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {availableFaults.map((f) => (
                   <button
                     key={f}
@@ -577,7 +577,7 @@ function CreateTestPanel({ projectId }: { projectId: string }) {
               <label className="block text-sm font-medium text-text-secondary mb-3">
                 Step 3 — Parameters
               </label>
-              <div className="grid grid-cols-2 gap-4">{getParameterFields()}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{getParameterFields()}</div>
             </div>
           )}
 

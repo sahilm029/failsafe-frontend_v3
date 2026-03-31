@@ -50,7 +50,7 @@ export function CommandBar() {
       />
 
       {/* Command Dialog */}
-      <div className="absolute left-1/2 top-[20%] -translate-x-1/2 w-full max-w-xl">
+      <div className="absolute left-1/2 top-[10%] sm:top-[20%] -translate-x-1/2 w-full max-w-xl px-4">
         <Command
           className="bg-surface border border-border rounded-lg shadow-xl overflow-hidden"
           shouldFilter={true}

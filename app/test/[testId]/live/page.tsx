@@ -306,8 +306,8 @@ export default function LiveTestPage({
       {getBanner()}
 
       {/* Top Control Bar */}
-      <div className="px-6 py-4 border-b border-border bg-card flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="px-4 md:px-6 py-4 border-b border-border bg-card flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {/* Test Info */}
           <div>
             <h1 className="text-lg font-semibold text-text-primary">
@@ -351,7 +351,7 @@ export default function LiveTestPage({
           <ConnectionIndicator state={wsConnectionState} />
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
           {/* Duration */}
           <div className="text-right">
             <p className="text-xs text-text-muted">Duration</p>
@@ -369,11 +369,11 @@ export default function LiveTestPage({
           )}
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button
               onClick={handleStart}
               disabled={test?.status === "running"}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded transition-colors disabled:opacity-50"
             >
               <PlayIcon className="w-4 h-4" />
               Start
@@ -381,14 +381,14 @@ export default function LiveTestPage({
             <button
               onClick={handleStop}
               disabled={test?.status !== "running"}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-danger/10 hover:bg-danger/20 text-danger rounded transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 py-2 bg-danger/10 hover:bg-danger/20 text-danger rounded transition-colors disabled:opacity-50"
             >
               <StopIcon className="w-4 h-4" />
               Stop
             </button>
             <button
               onClick={handleRestart}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors"
             >
               <ReloadIcon className="w-4 h-4" />
               Restart
@@ -398,9 +398,9 @@ export default function LiveTestPage({
       </div>
 
       {/* 3-Column Layout */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden overflow-y-auto md:overflow-y-hidden">
         {/* LEFT: Event Timeline (35%) */}
-        <div className="w-[35%] border-r border-border flex flex-col">
+        <div className="w-full md:w-[35%] border-b md:border-b-0 md:border-r border-border flex flex-col min-h-[300px] md:min-h-0">
           <div className="px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold text-text-primary">Event Timeline</h2>
           </div>
@@ -408,7 +408,7 @@ export default function LiveTestPage({
         </div>
 
         {/* CENTER: Metrics (40%) */}
-        <div className="w-[40%] border-r border-border flex flex-col">
+        <div className="w-full md:w-[40%] border-b md:border-b-0 md:border-r border-border flex flex-col min-h-[400px] md:min-h-0">
           <div className="px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold text-text-primary">Live Metrics</h2>
           </div>
@@ -447,7 +447,7 @@ export default function LiveTestPage({
         </div>
 
         {/* RIGHT: Live Logs (25%) */}
-        <div className="w-[25%] flex flex-col">
+        <div className="w-full md:w-[25%] flex flex-col min-h-[400px] md:min-h-0">
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-text-primary">Live Log Stream</h2>
@@ -506,7 +506,7 @@ export default function LiveTestPage({
       </div>
 
       {/* Footer Links */}
-      <div className="px-6 py-3 border-t border-border bg-card flex gap-4">
+      <div className="px-4 sm:px-6 py-3 border-t border-border bg-card flex flex-col sm:flex-row gap-4">
         <Link
           href={`/test/${testId}/logs`}
           className="text-sm text-primary hover:text-primary-hover"

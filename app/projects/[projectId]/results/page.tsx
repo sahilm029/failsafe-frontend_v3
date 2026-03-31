@@ -141,9 +141,9 @@ export default function ResultsPage({
   ];
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col lg:flex-row h-full relative">
       {/* Main Table */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-4 sm:p-6 w-full max-w-full overflow-auto">
         <h1 className="text-2xl font-semibold text-text-primary mb-6">
           Test Results
         </h1>
@@ -192,8 +192,8 @@ function ResultDetailPanel({
   };
 
   return (
-    <div className="w-[450px] border-l border-border bg-surface h-full overflow-y-auto">
-      <div className="p-6">
+    <div className="w-full lg:w-[450px] border-t lg:border-t-0 lg:border-l border-border bg-surface h-full overflow-y-auto">
+      <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-text-primary">Result Detail</h2>
@@ -204,7 +204,7 @@ function ResultDetailPanel({
 
         {/* Summary */}
         <div className="mb-6">
-          <div className={`text-center p-6 rounded-lg mb-4 ${
+          <div className={`text-center p-4 sm:p-6 rounded-lg mb-4 ${
             test.status === "completed" ? "bg-success/10" : "bg-danger/10"
           }`}>
             <StatusBadge status={test.status} className="text-lg" />

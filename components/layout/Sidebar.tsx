@@ -35,8 +35,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen bg-surface border-r border-border transition-all duration-300 z-40",
-        sidebarCollapsed ? "w-[60px]" : "w-[240px]"
+        "fixed left-0 top-0 h-screen bg-surface border-r border-border transition-all duration-300 z-50",
+        sidebarCollapsed ? "w-[60px]" : "w-[240px] shadow-2xl md:shadow-none"
       )}
     >
       <div className="flex flex-col h-full">
@@ -91,11 +91,12 @@ export function Sidebar() {
                 {!sidebarCollapsed && (
                   <span className="ml-3 text-sm">{item.label}</span>
                 )}
-                {sidebarCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-card rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap text-xs">
-                    {item.label}
-                  </div>
-                )}
+                <div className={cn(
+                  "absolute left-full ml-2 px-2 py-1 bg-card rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap text-xs z-50",
+                  sidebarCollapsed ? "block" : "hidden"
+                )}>
+                  {item.label}
+                </div>
               </Link>
             );
           })}

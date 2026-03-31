@@ -86,7 +86,7 @@ export default function MetricsPage({
   const stats = metrics ? calculateStats(metrics, statsMetric as keyof MetricPoint) : null;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-text-primary">Metrics</h1>
@@ -112,7 +112,7 @@ export default function MetricsPage({
       </div>
 
       {/* Time Window */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-text-muted">Time window:</span>
         {TIME_WINDOWS.filter((w) => w.value !== "custom").map((window) => (
           <button
@@ -130,7 +130,7 @@ export default function MetricsPage({
       </div>
 
       {/* Chart */}
-      <div className="bg-card rounded-lg border border-border p-6">
+      <div className="bg-card rounded-lg border border-border p-4 sm:p-6 w-full overflow-x-auto">
         {isLoading ? (
           <div className="h-[400px] flex items-center justify-center">
             <div className="animate-pulse text-text-muted">Loading metrics...</div>
@@ -199,7 +199,7 @@ export default function MetricsPage({
 
       {/* Stats Summary */}
       {stats && (
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {[
             { label: "Min", value: stats.min },
             { label: "Max", value: stats.max },

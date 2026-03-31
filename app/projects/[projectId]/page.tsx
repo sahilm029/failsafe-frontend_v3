@@ -55,7 +55,7 @@ export default function ProjectDetailPage({
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
         <SkeletonCard />
         <div className="grid grid-cols-3 gap-4">
           <SkeletonCard />
@@ -69,7 +69,7 @@ export default function ProjectDetailPage({
 
   if (!project) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6 max-w-full overflow-x-hidden">
         <div className="text-center py-16">
           <p className="text-text-secondary">Project not found</p>
           <Link href="/projects" className="text-primary hover:text-primary-hover mt-2 inline-block">
@@ -81,9 +81,9 @@ export default function ProjectDetailPage({
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">
             {project.name}
@@ -92,14 +92,14 @@ export default function ProjectDetailPage({
             <p className="text-text-secondary mt-1">{project.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 px-3 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <button className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors">
             <Pencil1Icon className="w-4 h-4" />
             Edit
           </button>
           <button
             onClick={handleDelete}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-danger/10 hover:bg-danger/20 text-danger rounded border border-danger/20 transition-colors"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 py-2 bg-danger/10 hover:bg-danger/20 text-danger rounded border border-danger/20 transition-colors"
           >
             <TrashIcon className="w-4 h-4" />
             Delete
@@ -128,22 +128,22 @@ export default function ProjectDetailPage({
       </div>
 
       {/* Quick Links */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
         <Link
           href={`/projects/${projectId}/environments`}
-          className="px-4 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors"
+          className="w-full sm:w-auto text-center px-4 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors"
         >
           Manage Environments
         </Link>
         <Link
           href={`/projects/${projectId}/tests`}
-          className="px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded transition-colors"
+          className="w-full sm:w-auto text-center px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded transition-colors"
         >
           View Tests
         </Link>
         <Link
           href={`/projects/${projectId}/results`}
-          className="px-4 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors"
+          className="w-full sm:w-auto text-center px-4 py-2 bg-card hover:bg-card/80 text-text-primary rounded border border-border transition-colors"
         >
           View Results
         </Link>
@@ -168,7 +168,7 @@ export default function ProjectDetailPage({
           ))}
           <Link
             href={`/projects/${projectId}/environments`}
-            className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors text-text-muted hover:text-primary"
+            className="flex items-center justify-center gap-2 p-4 sm:p-6 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors text-text-muted hover:text-primary"
           >
             <PlusIcon className="w-5 h-5" />
             <span>Add Environment</span>
@@ -189,8 +189,8 @@ export default function ProjectDetailPage({
             View All →
           </Link>
         </div>
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <table className="w-full">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase">Test</th>

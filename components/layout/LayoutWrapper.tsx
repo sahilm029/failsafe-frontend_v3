@@ -9,8 +9,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col transition-all duration-300",
-        sidebarCollapsed ? "ml-[60px]" : "ml-[240px]"
+        "flex flex-col flex-1 h-screen overflow-hidden transition-all duration-300 min-w-0 w-full",
+        sidebarCollapsed ? "pl-[60px]" : "pl-[60px] md:pl-[240px]"
       )}
     >
       {children}

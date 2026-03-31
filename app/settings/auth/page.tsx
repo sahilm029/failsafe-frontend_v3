@@ -11,7 +11,7 @@ import { TrashIcon } from "@radix-ui/react-icons";
 
 export default function AuthSettingsPage() {
   return (
-    <div className="p-6 max-w-4xl space-y-6">
+    <div className="p-4 sm:p-6 max-w-4xl max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
       <h1 className="text-2xl font-semibold text-text-primary">Authentication</h1>
       <LoginMethodsCard />
       <ActiveSessionsCard />
@@ -28,7 +28,7 @@ function LoginMethodsCard() {
   const [githubClientId, setGithubClientId] = useState("");
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-text-primary mb-6">Login Methods</h2>
       <div className="space-y-4">
         {/* Magic Link */}
@@ -104,7 +104,7 @@ function LoginMethodsCard() {
           )}
         </div>
 
-        <button className="px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors">
+        <button className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors">
           Save Changes
         </button>
       </div>
@@ -169,7 +169,7 @@ function ActiveSessionsCard() {
   ];
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-text-primary mb-6">Active Sessions</h2>
       {isLoading ? (
         <SkeletonTable rows={3} columns={4} />
@@ -192,7 +192,7 @@ function SecuritySettingsCard() {
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-text-primary mb-6">Security</h2>
       <div className="space-y-4">
         <div>
@@ -200,7 +200,7 @@ function SecuritySettingsCard() {
           <select
             value={sessionTimeout}
             onChange={(e) => setSessionTimeout(e.target.value)}
-            className="w-full max-w-xs px-3 py-2 bg-surface border border-border rounded text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full sm:max-w-xs px-3 py-2 bg-surface border border-border rounded text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="1h">1 hour</option>
             <option value="8h">8 hours</option>
@@ -210,7 +210,7 @@ function SecuritySettingsCard() {
         </div>
         <button
           onClick={handleSave}
-          className="px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
+          className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
         >
           Save Security Settings
         </button>

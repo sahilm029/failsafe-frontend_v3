@@ -167,13 +167,13 @@ export default function ProjectsPage() {
   const hasFilteredProjects = filteredProjects.length > 0;
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-semibold text-text-primary">Projects</h1>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
+          className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           New Project
@@ -211,7 +211,7 @@ export default function ProjectsPage() {
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
           >
             <PlusIcon className="w-4 h-4" />
             New Project
@@ -228,12 +228,14 @@ export default function ProjectsPage() {
           </p>
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={filteredProjects}
-          onRowClick={(project) => router.push(`/projects/${project.id}`)}
-          emptyMessage="No projects found"
-        />
+        <div className="w-full overflow-x-auto">
+          <DataTable
+            columns={columns}
+            data={filteredProjects}
+            onRowClick={(project) => router.push(`/projects/${project.id}`)}
+            emptyMessage="No projects found"
+          />
+        </div>
       )}
 
       {/* Create Modal */}
@@ -260,8 +262,8 @@ function CreateProjectModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-card border border-border rounded-lg w-full max-w-md p-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+      <div className="bg-card border border-border rounded-lg w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-semibold text-text-primary mb-4">
           Create Project
         </h2>

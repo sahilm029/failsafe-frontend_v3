@@ -8,7 +8,7 @@ import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons";
 
 export default function IntegrationsPage() {
   return (
-    <div className="p-6 max-w-4xl space-y-6">
+    <div className="p-4 sm:p-6 max-w-4xl max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
       <h1 className="text-2xl font-semibold text-text-primary">Integrations</h1>
       <SlackIntegrationCard />
       <EmailIntegrationCard />
@@ -43,7 +43,7 @@ function SlackIntegrationCard() {
   });
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold text-text-primary">Slack Integration</h2>
@@ -101,18 +101,18 @@ function SlackIntegrationCard() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             onClick={() => testMutation.mutate()}
             disabled={!webhookUrl || testMutation.isPending}
-            className="px-4 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors disabled:opacity-50"
           >
             {testMutation.isPending ? "Sending..." : "Test Notification"}
           </button>
           <button
             onClick={() => saveMutation.mutate()}
             disabled={!webhookUrl || saveMutation.isPending}
-            className="px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? "Saving..." : "Save"}
           </button>
@@ -174,7 +174,7 @@ function EmailIntegrationCard() {
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-text-primary mb-6">Email Integration</h2>
 
       <div className="space-y-4">
@@ -306,18 +306,18 @@ function EmailIntegrationCard() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             onClick={() => testMutation.mutate()}
             disabled={recipients.length === 0 || testMutation.isPending}
-            className="px-4 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 bg-surface hover:bg-surface/80 text-text-primary rounded border border-border transition-colors disabled:opacity-50"
           >
             {testMutation.isPending ? "Sending..." : "Send Test Email"}
           </button>
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? "Saving..." : "Save"}
           </button>

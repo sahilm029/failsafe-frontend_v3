@@ -43,15 +43,15 @@ export default function EnvironmentsPage({
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-semibold text-text-primary">
           Environments
         </h1>
         <button
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
+          className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           Add Environment
@@ -59,7 +59,7 @@ export default function EnvironmentsPage({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {(["all", "backend", "frontend", "android"] as const).map((type) => (
           <button
             key={type}
@@ -261,10 +261,10 @@ function EnvironmentSheet({
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/50" onClick={onClose} />
-      <div className="w-full max-w-md bg-surface border-l border-border h-full overflow-y-auto">
-        <div className="p-6">
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="flex-1 bg-black/50 absolute inset-0" onClick={onClose} />
+      <div className="relative w-full sm:max-w-md bg-surface border-l border-border h-full overflow-y-auto">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-text-primary">
               {environment ? "Edit Environment" : "Add Environment"}

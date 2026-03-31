@@ -38,20 +38,21 @@ export function TopBar() {
   const connectionStatus = getConnectionStatus();
 
   return (
-    <header className="h-16 border-b border-border bg-surface flex items-center justify-between px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-3 md:px-6 gap-2">
       {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-1 md:gap-2 text-sm flex-1 min-w-0 pr-2 md:pr-4">
         {breadcrumbs.length === 0 ? (
-          <span className="text-text-primary">Dashboard</span>
+          <span className="text-text-primary whitespace-nowrap overflow-hidden text-ellipsis">Dashboard</span>
         ) : (
           breadcrumbs.map((crumb, index) => (
-            <div key={crumb.path} className="flex items-center gap-2">
-              {index > 0 && <span className="text-text-muted">/</span>}
+            <div key={crumb.path} className="flex items-center gap-1 md:gap-2 min-w-0 shrink">
+              {index > 0 && <span className="text-text-muted shrink-0">/</span>}
               <span
                 className={cn(
+                  "truncate block",
                   index === breadcrumbs.length - 1
                     ? "text-text-primary"
-                    : "text-text-secondary"
+                    : "text-text-secondary hidden sm:block"
                 )}
               >
                 {crumb.label}
@@ -62,21 +63,21 @@ export function TopBar() {
       </div>
 
       {/* Right side actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4 shrink-0">
         {/* Command bar trigger */}
         <button
           onClick={() => setCommandBarOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-card rounded border border-border hover:border-primary transition-colors"
+          className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-card rounded border border-border hover:border-primary transition-colors"
         >
           <MagnifyingGlassIcon className="w-4 h-4 text-text-secondary" />
-          <span className="text-xs text-text-muted">Search</span>
-          <kbd className="px-1.5 py-0.5 text-xs bg-surface rounded border border-border text-text-muted">
+          <span className="text-xs text-text-muted hidden md:inline-block">Search</span>
+          <kbd className="px-1.5 py-0.5 text-xs bg-surface rounded border border-border text-text-muted hidden md:inline-block">
             ⌘K
           </kbd>
         </button>
 
         {/* Connection status */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded">
+        <div className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-card rounded">
           <div
             className={cn(
               "w-2 h-2 rounded-full",
@@ -84,7 +85,7 @@ export function TopBar() {
               wsConnectionState === "connected" && "animate-pulse"
             )}
           />
-          <span className="text-xs text-text-secondary">
+          <span className="text-xs text-text-secondary hidden sm:inline-block">
             {connectionStatus.label}
           </span>
         </div>
