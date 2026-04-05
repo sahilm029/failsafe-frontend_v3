@@ -1,327 +1,147 @@
 "use client";
 
-import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getTests, getTestResult, exportTestPDF } from "@/lib/api";
+import { getTests } from "@/lib/api";
+import { DataTable } from "@/components/shared/DataTable";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { SkeletonCard } from "@/components/shared/LoadingSkeleton";
+import { Search, Filter, Download } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import type { Test } from "@/lib/types";
-import { DataTable, StatusBadge, Timeline, SkeletonTable } from "@/components/shared";
-import type { Column } from "@/components/shared/DataTable";
-import { DownloadIcon, Cross2Icon, ArrowUpIcon, ArrowDownIcon } from "@radix-ui/react-icons";
-import { toast } from "sonner";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function ResultsPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = use(params);
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+export default function ProjectResultsPage({ params }: { params: { projectId: string } }) {
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: tests, isLoading } = useQuery({
-    queryKey: ["tests", projectId],
-    queryFn: () => getTests(projectId),
+  const { data: tests, isLoading, error } = useQuery({
+    queryKey: ["project-tests-results", params.projectId],
+    queryFn: async () => {
+      // TODO: Backend gap — no dedicated endpoint for listing all tests in a project or filtering endpoints.
+      throw new Error("Backend gap: GET /projects/:id/tests and filtered listings not yet implemented");
+      return [] as Test[];
+    },
   });
 
-  const completedTests = (tests ?? []).filter(
-    (t) => t.status === "completed" || t.status === "failed"
-  );
-
-  const handleExportJSON = (test: Test) => {
-    const blob = new Blob([JSON.stringify(test, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${test.name.replace(/\s+/g, "-")}-result.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("JSON exported");
+  const handleExport = () => {
+    // TODO: Backend gap — missing endpoint for exporting PDF results
+    console.warn("Backend gap: POST /reports/export not yet implemented");
+    alert("Export functionality currently unavailable (awaiting backend integration).");
   };
 
-  const handleExportPDF = async (testId: string) => {
-    try {
-      const blob = await exportTestPDF(testId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `test-result-${testId}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("PDF exported");
-    } catch {
-      toast.error("Failed to export PDF");
-    }
-  };
+  const filteredTests = tests?.filter(test => {
+    const matchesSearch = test.name.toLowerCase().includes(search.toLowerCase()) || test.id.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || test.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
-  const formatDuration = (start?: number, end?: number) => {
-    if (!start) return "—";
-    const endTime = end || Date.now();
-    const diff = Math.floor((endTime - start) / 1000);
-    const mins = Math.floor(diff / 60);
-    const secs = diff % 60;
-    return `${mins}m ${secs}s`;
-  };
-
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "—";
-    return new Date(timestamp).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const columns: Column<Test>[] = [
-    { key: "name", label: "Test Name" },
-    {
-      key: "target",
-      label: "Target",
-      render: (test) => {
-        const colors = {
-          backend: "bg-secondary/20 text-secondary",
-          frontend: "bg-info/20 text-info",
-          android: "bg-warning/20 text-warning",
-        };
-        return (
-          <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors[test.target]}`}>
-            {test.target}
-          </span>
-        );
-      },
-    },
-    { key: "fault", label: "Fault" },
-    {
-      key: "status",
-      label: "Status",
-      render: (test) => <StatusBadge status={test.status} />,
-    },
-    {
-      key: "duration",
-      label: "Duration",
-      render: (test) => (
-        <span className="text-text-secondary">
-          {formatDuration(test.startTime, test.endTime)}
-        </span>
-      ),
-    },
-    {
-      key: "startTime",
-      label: "Started",
-      render: (test) => (
-        <span className="text-text-secondary">{formatDate(test.startTime)}</span>
-      ),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (test) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedTest(test);
-            }}
-            className="text-xs text-primary hover:text-primary-hover"
-          >
-            View Detail
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleExportJSON(test);
-            }}
-            className="p-1.5 rounded hover:bg-surface transition-colors"
-            title="Export JSON"
-          >
-            <DownloadIcon className="w-4 h-4 text-text-secondary" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const totalTests = tests?.length || 0;
+  const passedTests = tests?.filter(t => t.status === "completed").length || 0;
+  const failedTests = tests?.filter(t => t.status === "failed").length || 0;
+  const passRate = totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0;
 
   return (
-    <div className="flex flex-col lg:flex-row h-full relative">
-      {/* Main Table */}
-      <div className="flex-1 p-4 sm:p-6 w-full max-w-full overflow-auto">
-        <h1 className="text-2xl font-semibold text-text-primary mb-6">
-          Test Results
-        </h1>
-        {isLoading ? (
-          <SkeletonTable rows={5} columns={7} />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={completedTests}
-            onRowClick={(test) => setSelectedTest(test)}
-            emptyMessage="No test results yet"
-          />
-        )}
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Test Results</h1>
+          <p className="text-text-secondary mt-1">View and filter historical test runs for this project.</p>
+        </div>
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 px-4 py-2 bg-surface text-text-primary border border-border rounded-md hover:bg-surface-hover transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export PDF
+        </button>
       </div>
 
-      {/* Detail Panel */}
-      {selectedTest && (
-        <ResultDetailPanel
-          test={selectedTest}
-          onClose={() => setSelectedTest(null)}
-          onExportPDF={() => handleExportPDF(selectedTest.id)}
-        />
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : error ? (
+        <div className="bg-danger/10 border border-danger p-4 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-danger font-medium">Failed to load results</h3>
+            <p className="text-danger/80 text-sm mt-1">{(error as Error).message}</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-card border border-border p-4 rounded-lg">
+              <p className="text-sm text-text-muted mb-1">Total Runs</p>
+              <p className="text-2xl font-bold text-text-primary">{totalTests}</p>
+            </div>
+            <div className="bg-card border border-border p-4 rounded-lg">
+              <p className="text-sm text-text-muted mb-1">Passed</p>
+              <p className="text-2xl font-bold text-success">{passedTests}</p>
+            </div>
+            <div className="bg-card border border-border p-4 rounded-lg">
+              <p className="text-sm text-text-muted mb-1">Failed</p>
+              <p className="text-2xl font-bold text-danger">{failedTests}</p>
+            </div>
+            <div className="bg-card border border-border p-4 rounded-lg">
+              <p className="text-sm text-text-muted mb-1">Pass Rate</p>
+              <p className="text-2xl font-bold text-primary">{passRate}%</p>
+            </div>
+          </div>
+
+          {/* Filters and Search */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search tests by name or ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-surface text-text-primary border border-border rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="relative w-full sm:w-48">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-surface text-text-primary border border-border rounded-md appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer hover:bg-surface-hover"
+              >
+                <option value="all">All Statuses</option>
+                <option value="running">Running</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Data Table */}
+          <div className="bg-card border border-border rounded-lg overflow-hidden">
+            <DataTable
+              columns={[
+                { key: "name", label: "Name", render: (t: Test) => <span className="font-medium text-text-primary">{t.name}</span> },
+                { key: "target", label: "Target", className: "capitalize text-text-secondary" },
+                { key: "fault", label: "Fault", className: "capitalize text-text-secondary" },
+                { key: "status", label: "Status", render: (t: Test) => <StatusBadge status={t.status} /> },
+                { key: "duration", label: "Duration", render: (t: Test) => <span className="text-text-secondary">{t.duration ? `${t.duration}s` : "—"}</span> },
+                { key: "startTime", label: "Started At", render: (t: Test) => <span className="text-text-secondary">{t.startTime ? new Date(t.startTime).toLocaleString() : "—"}</span> }
+              ]}
+              data={filteredTests || []}
+              loading={isLoading}
+              onRowClick={(item) => router.push(`/test/${item.id}/live`)}
+              emptyMessage={totalTests === 0 ? "No test runs found." : "No tests match the current filters."}
+            />
+          </div>
+        </>
       )}
-    </div>
-  );
-}
-
-function ResultDetailPanel({
-  test,
-  onClose,
-  onExportPDF,
-}: {
-  test: Test;
-  onClose: () => void;
-  onExportPDF: () => void;
-}) {
-  const { data: result } = useQuery({
-    queryKey: ["test-result", test.id],
-    queryFn: () => getTestResult(test.id),
-  });
-
-  // Mock comparison data
-  const comparison = {
-    baseline: { latencyAvg: 150, errorRate: 0.5, throughput: 1000 },
-    current: result?.metrics || { latencyAvg: 200, errorRate: 2.5, throughput: 850 },
-  };
-
-  return (
-    <div className="w-full lg:w-[450px] border-t lg:border-t-0 lg:border-l border-border bg-surface h-full overflow-y-auto">
-      <div className="p-4 sm:p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-text-primary">Result Detail</h2>
-          <button onClick={onClose} className="p-1 hover:bg-card rounded">
-            <Cross2Icon className="w-5 h-5 text-text-muted" />
-          </button>
-        </div>
-
-        {/* Summary */}
-        <div className="mb-6">
-          <div className={`text-center p-4 sm:p-6 rounded-lg mb-4 ${
-            test.status === "completed" ? "bg-success/10" : "bg-danger/10"
-          }`}>
-            <StatusBadge status={test.status} className="text-lg" />
-            <p className="text-xs text-text-muted mt-2">
-              Duration: {test.startTime && test.endTime
-                ? `${Math.floor((test.endTime - test.startTime) / 1000)}s`
-                : "—"}
-            </p>
-          </div>
-
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-text-muted">Target</span>
-              <span className="text-text-primary">{test.target}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-text-muted">Fault Applied</span>
-              <span className="text-text-primary">{test.fault}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Comparison */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-text-primary mb-3">
-            Comparison vs Baseline
-          </h3>
-          <div className="space-y-3">
-            <ComparisonRow
-              label="Latency Avg"
-              baseline={comparison.baseline.latencyAvg}
-              current={comparison.current.latencyAvg}
-              unit="ms"
-              higherIsBad
-            />
-            <ComparisonRow
-              label="Error Rate"
-              baseline={comparison.baseline.errorRate}
-              current={comparison.current.errorRate}
-              unit="%"
-              higherIsBad
-            />
-            <ComparisonRow
-              label="Throughput"
-              baseline={comparison.baseline.throughput}
-              current={comparison.current.throughput}
-              unit="req/s"
-              higherIsBad={false}
-            />
-          </div>
-        </div>
-
-        {/* Root Cause (if failed) */}
-        {test.status === "failed" && (
-          <div className="mb-6 p-4 bg-danger/5 border border-danger/20 rounded-lg">
-            <h3 className="text-sm font-semibold text-danger mb-2">Root Cause Analysis</h3>
-            <p className="text-sm text-text-secondary">
-              Latency spike detected 2.3s after fault injection. Service response degradation
-              correlated with memory pressure at 85% threshold.
-            </p>
-          </div>
-        )}
-
-        {/* Timeline */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-text-primary mb-3">Timeline</h3>
-          <Timeline events={result?.timeline || []} className="max-h-[200px]" />
-        </div>
-
-        {/* Export */}
-        <div className="flex gap-2">
-          <button
-            onClick={onExportPDF}
-            className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground rounded font-medium transition-colors"
-          >
-            Export PDF
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ComparisonRow({
-  label,
-  baseline,
-  current,
-  unit,
-  higherIsBad,
-}: {
-  label: string;
-  baseline: number;
-  current: number;
-  unit: string;
-  higherIsBad: boolean;
-}) {
-  const diff = ((current - baseline) / baseline) * 100;
-  const isUp = diff > 0;
-  const isBad = higherIsBad ? isUp : !isUp;
-
-  return (
-    <div className="flex items-center justify-between p-3 bg-card rounded">
-      <span className="text-sm text-text-secondary">{label}</span>
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <span className="text-xs text-text-muted">Baseline</span>
-          <p className="text-sm text-text-primary">{baseline}{unit}</p>
-        </div>
-        <div className="text-right">
-          <span className="text-xs text-text-muted">Current</span>
-          <p className="text-sm text-text-primary">{current}{unit}</p>
-        </div>
-        <div className={`flex items-center gap-1 text-sm ${isBad ? "text-danger" : "text-success"}`}>
-          {isUp ? <ArrowUpIcon className="w-3 h-3" /> : <ArrowDownIcon className="w-3 h-3" />}
-          {Math.abs(diff).toFixed(1)}%
-        </div>
-      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ export const STATUS_COLORS: Record<TestStatus, { bg: string; text: string; dot?:
   failed: { bg: "bg-danger", text: "text-white", dot: "bg-danger" },
   queued: { bg: "bg-warning", text: "text-white", dot: "bg-warning" },
   idle: { bg: "bg-text-muted", text: "text-white", dot: "bg-text-muted" },
+  stopped: { bg: "bg-surface", text: "text-text-secondary", dot: "bg-text-muted" },
 };
 
 // Log level colors
@@ -41,7 +42,7 @@ export const TARGET_LABELS: Record<TargetType, string> = {
 };
 
 // Fault type labels
-export const FAULT_LABELS: Record<FaultType, string> = {
+export const FAULT_LABELS: Record<string, string> = {
   latency: "Latency",
   cpu: "CPU",
   memory: "Memory",

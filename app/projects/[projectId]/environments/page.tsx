@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getEnvironments, createEnvironment, updateEnvironment, deleteEnvironment } from "@/lib/api";
 import type { Environment, TargetType } from "@/lib/types";
@@ -16,9 +16,9 @@ import { toast } from "sonner";
 export default function EnvironmentsPage({
   params,
 }: {
-  params: Promise<{ projectId: string }>;
+  params: { projectId: string };
 }) {
-  const { projectId } = use(params);
+  const { projectId } = params;
   const [filter, setFilter] = useState<TargetType | "all">("all");
   const [showSheet, setShowSheet] = useState(false);
   const [editingEnv, setEditingEnv] = useState<Environment | null>(null);

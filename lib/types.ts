@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 // Core status and type enums
-export type TestStatus = "running" | "failed" | "completed" | "queued" | "idle";
+export type TestStatus = "running" | "failed" | "completed" | "queued" | "idle" | "stopped";
 export type TargetType = "backend" | "frontend" | "android";
-export type FaultType = "latency" | "cpu" | "memory" | "network" | "ui" | "android";
-export type LogLevel = "info" | "warn" | "error" | "debug";
+export type FaultType = "latency" | "cpu" | "memory" | "network" | "ui" | "android" | "kill" | "kill_app" | "network_disable" | "network_enable" | "network_flaky" | "network_latency" | "network_packet_loss" | "revoke_camera" | "revoke_storage" | "revoke_location" | "background_app" | "foreground_app" | "clear_data" | "network_delay" | "packet_loss" | "cpu_stress" | "memory_stress";
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 // Test entity
 export interface Test {
   id: string;
+  backendId?: string;
   name: string;
   status: TestStatus;
   target: TargetType;
@@ -20,6 +22,7 @@ export interface Test {
   createdAt: number;
   startTime?: number;
   endTime?: number;
+  duration?: number;
 }
 
 // Project and environment entities
@@ -30,6 +33,9 @@ export interface Project {
   environments: Environment[];
   lastRun?: number;
   failureRate?: number;
+  environmentCount?: number;
+  lastRunAt?: string;
+  healthStatus?: "healthy" | "degraded" | "failing";
 }
 
 export interface Environment {
@@ -76,7 +82,7 @@ export type WSEventType =
 export interface WSEvent {
   type: WSEventType;
   timestamp: number;
-  payload: Record<string, unknown>;
+  payload: Record<string, any>;
 }
 
 // Dashboard stats

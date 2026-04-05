@@ -14,7 +14,7 @@ export const StatusBadge = memo(function StatusBadge({
   showDot = true,
   className,
 }: StatusBadgeProps) {
-  const colors = STATUS_COLORS[status];
+  const colors = STATUS_COLORS[status as keyof typeof STATUS_COLORS] || { bg: "bg-surface text-text-secondary", text: "text-text-secondary", dot: "bg-text-muted" };
 
   return (
     <div

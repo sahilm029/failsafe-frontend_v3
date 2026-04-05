@@ -1,314 +1,230 @@
-import type {
-  ApiError,
-  CreateProjectRequest,
-  CreateEnvironmentRequest,
-  CreateTestRequest,
-  DashboardStats,
-  Environment,
-  FaultSchema,
-  LogEntry,
-  LogFilters,
-  MetricPoint,
-  MetricsParams,
-  Project,
-  Test,
-  TestResult,
-  SlackSettings,
-  EmailSettings,
-  AuthSession,
-} from "./types";
+// BACKEND CONTRACT
+// GET    /health                          → string "OK"
+// POST   /upload/apk                      → { package: string, activity: string }
+// POST   /experiments/backend/start       → { id: string }
+// GET    /experiments/backend/status      → { status: string, ... }
+// POST   /experiments/backend/stop        → void
+// GET    /experiments/backend/metrics     → MetricPoint[]
+// POST   /experiments/android/start       → { id: string }
+// GET    /experiments/android/status      → { status: string, ... }
+// POST   /experiments/android/stop        → void
+// GET    /experiments/android/metrics     → MetricPoint[]
+// POST   /experiments/frontend/start      → { id: string }
+// GET    /experiments/frontend/status     → { status: string, ... }
+// POST   /experiments/frontend/stop       → void
+// GET    /experiments/frontend/metrics    → MetricPoint[]
+// POST   /experiments/frontend/fault-command → void
+// GET    /scenarios/presets               → Presets[]
+// POST   /frontend/metrics                → void
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
-// Generic fetch wrapper with error handling
-async function fetchAPI<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+import type { Project, Test, MetricPoint, CreateTestRequest } from "./types";
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-    });
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const error = new Error(
-        errorData.message || `API error: ${response.status}`
-      ) as ApiError & Error;
-      error.name = "ApiError";
-      (error as unknown as ApiError).statusCode = response.status;
-      (error as unknown as ApiError).details = errorData;
-      throw error;
-    }
-
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return response.json();
-  } catch (error) {
-    if ((error as Error).name === "ApiError") {
-      throw error;
-    }
-    // Network error or other failure
-    const apiError = new Error(
-      "Network error or server unavailable"
-    ) as ApiError & Error;
-    apiError.name = "ApiError";
-    (apiError as unknown as ApiError).statusCode = 0;
-    throw apiError;
-  }
-}
-
-// ============================================================================
-// PROJECTS
-// ============================================================================
-
-export async function getProjects(): Promise<Project[]> {
-  return fetchAPI<Project[]>("/projects");
-}
-
-export async function createProject(
-  data: CreateProjectRequest
-): Promise<Project> {
-  return fetchAPI<Project>("/projects", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export async function getProject(id: string): Promise<Project> {
-  return fetchAPI<Project>(`/projects/${id}`);
-}
-
-export async function deleteProject(id: string): Promise<void> {
-  return fetchAPI<void>(`/projects/${id}`, {
-    method: "DELETE",
-  });
-}
-
-// ============================================================================
-// ENVIRONMENTS
-// ============================================================================
-
-export async function getEnvironments(projectId: string): Promise<Environment[]> {
-  return fetchAPI<Environment[]>(`/projects/${projectId}/environments`);
-}
-
-export async function createEnvironment(
-  projectId: string,
-  data: CreateEnvironmentRequest
-): Promise<Environment> {
-  return fetchAPI<Environment>(`/projects/${projectId}/environments`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export async function updateEnvironment(
-  id: string,
-  data: Partial<CreateEnvironmentRequest>
-): Promise<Environment> {
-  return fetchAPI<Environment>(`/environments/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
-}
-
-export async function deleteEnvironment(id: string): Promise<void> {
-  return fetchAPI<void>(`/environments/${id}`, {
-    method: "DELETE",
-  });
-}
-
-// ============================================================================
-// TESTS
-// ============================================================================
-
-export async function getTests(projectId: string): Promise<Test[]> {
-  return fetchAPI<Test[]>(`/projects/${projectId}/tests`);
-}
-
-export async function createTest(
-  projectId: string,
-  data: CreateTestRequest
-): Promise<Test> {
-  return fetchAPI<Test>(`/projects/${projectId}/tests`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export async function runTest(id: string): Promise<void> {
-  return fetchAPI<void>(`/tests/${id}/run`, {
-    method: "POST",
-  });
-}
-
-export async function stopTest(id: string): Promise<void> {
-  return fetchAPI<void>(`/tests/${id}/stop`, {
-    method: "POST",
-  });
-}
-
-export async function restartTest(id: string): Promise<void> {
-  return fetchAPI<void>(`/tests/${id}/restart`, {
-    method: "POST",
-  });
-}
-
-export async function deleteTest(id: string): Promise<void> {
-  return fetchAPI<void>(`/tests/${id}`, {
-    method: "DELETE",
-  });
-}
-
-export async function getTestResult(id: string): Promise<TestResult> {
-  return fetchAPI<TestResult>(`/tests/${id}/result`);
-}
-
-// ============================================================================
-// LOGS & METRICS
-// ============================================================================
-
-export async function getTestLogs(
-  id: string,
-  filters?: LogFilters
-): Promise<{ logs: LogEntry[]; total: number }> {
-  const params = new URLSearchParams();
-
-  if (filters?.service?.length) {
-    params.append("service", filters.service.join(","));
-  }
-  if (filters?.level?.length) {
-    params.append("level", filters.level.join(","));
-  }
-  if (filters?.search) {
-    params.append("search", filters.search);
-  }
-  if (filters?.from) {
-    params.append("from", filters.from.toString());
-  }
-  if (filters?.to) {
-    params.append("to", filters.to.toString());
-  }
-  if (filters?.page) {
-    params.append("page", filters.page.toString());
-  }
-
-  const queryString = params.toString();
-  return fetchAPI<{ logs: LogEntry[]; total: number }>(
-    `/tests/${id}/logs${queryString ? `?${queryString}` : ""}`
-  );
-}
-
-export async function getTestMetrics(
-  id: string,
-  params?: MetricsParams
-): Promise<MetricPoint[]> {
-  const searchParams = new URLSearchParams();
-
-  if (params?.window) {
-    searchParams.append("window", params.window);
-  }
-  if (params?.type) {
-    searchParams.append("type", params.type);
-  }
-  if (params?.from) {
-    searchParams.append("from", params.from.toString());
-  }
-  if (params?.to) {
-    searchParams.append("to", params.to.toString());
-  }
-
-  const queryString = searchParams.toString();
-  return fetchAPI<MetricPoint[]>(
-    `/tests/${id}/metrics${queryString ? `?${queryString}` : ""}`
-  );
-}
-
-export async function exportTestPDF(id: string): Promise<Blob> {
-  const url = `${API_BASE_URL}/tests/${id}/export/pdf`;
+async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${BASE_URL}${endpoint}`;
   const response = await fetch(url, {
-    method: "POST",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
   });
 
   if (!response.ok) {
-    throw new Error("Failed to export PDF");
+      const errText = await response.text();
+      console.error(`API response text:`, errText);
+      throw new Error(`API error: ${response.status} ${errText}`);
   }
 
-  return response.blob();
+  if (response.status === 204) return undefined as T;
+
+  const text = await response.text();
+  if (!text) return undefined as T;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 }
 
-// ============================================================================
-// FAULT SCHEMA
-// ============================================================================
-
-export async function getFaultSchema(faultType: string): Promise<FaultSchema> {
-  return fetchAPI<FaultSchema>(`/fault-schema/${faultType}`);
+export async function getHealth(): Promise<{ status: string }> {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const text: any = await fetchAPI<string>("/health");
+  return { status: typeof text === "string" ? text : "OK" };
 }
 
-// ============================================================================
-// DASHBOARD
-// ============================================================================
-
-export async function getDashboardStats(): Promise<DashboardStats> {
-  return fetchAPI<DashboardStats>("/stats");
+export async function getScenarioPresets(): Promise<any[]> {
+  return fetchAPI<any[]>("/scenarios/presets");
 }
 
-export async function rerunLastTest(): Promise<void> {
-  return fetchAPI<void>("/tests/rerun/last", {
+export async function startBackendExperiment(config: any): Promise<{ id: string }> {
+  return fetchAPI<{ id: string }>("/experiments/backend/start", {
+    method: "POST",
+    body: JSON.stringify(config),
+  });
+}
+
+export async function getExperimentStatus(platform: string, id: string): Promise<Test> {
+  return fetchAPI<Test>(`/experiments/${platform}/status?id=${id}`);
+}
+
+export async function stopExperiment(platform: string, id: string): Promise<void> {
+  return fetchAPI<void>(`/experiments/${platform}/stop?id=${id}`, {
     method: "POST",
   });
 }
 
-// ============================================================================
-// SETTINGS - INTEGRATIONS
-// ============================================================================
+export async function getExperimentMetrics(platform: string, id: string): Promise<MetricPoint[]> {
+  return fetchAPI<MetricPoint[]>(`/experiments/${platform}/metrics?id=${id}`);
+}
 
-export async function saveSlackSettings(data: SlackSettings): Promise<void> {
-  return fetchAPI<void>("/settings/slack", {
+// ==========================================
+// GAP MODULES (Disabled or Mocked)
+// ==========================================
+
+// Mock Data to keep the UI functional until backend implements CRUD
+const MOCK_PROJECTS: Project[] = [
+  {
+    id: "proj-1",
+    name: "E-Commerce System",
+    description: "Main monolith and microservices",
+    createdAt: Date.now() - 86400000 * 7,
+    updatedAt: Date.now() - 3600000,
+    status: "healthy",
+  },
+  {
+    id: "proj-2",
+    name: "Payment Gateway",
+    description: "Stripe integration services",
+    createdAt: Date.now() - 86400000 * 14,
+    updatedAt: Date.now() - 86400000,
+    status: "degraded",
+  },
+];
+
+export async function getProjects(): Promise<Project[]> { return MOCK_PROJECTS; }
+export async function getProject(id: string): Promise<Project> { 
+  const p = MOCK_PROJECTS.find(x => x.id === id);
+  if (!p) throw new Error("Project not found");
+  return p;
+}
+export async function getProjectById(id: string): Promise<Project> { 
+  const p = MOCK_PROJECTS.find(x => x.id === id);
+  if (!p) throw new Error("Project not found");
+  return p;
+}
+export async function createProject(data: any): Promise<Project> { 
+  const proj: Project = {
+    id: `proj-${Date.now()}`,
+    name: data.name || "New Project",
+    description: data.description || "",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    status: "healthy",
+  };
+  MOCK_PROJECTS.push(proj);
+  return proj;
+}
+export async function deleteProject(id: string): Promise<void> { throw new Error("Backend endpoint not yet available"); }
+
+const MOCK_TESTS: Test[] = [
+  {
+    id: "test-1234",
+    projectId: "proj-1",
+    name: "API Memory Leak Check",
+    description: "Check memory consumption under load",
+    status: "idle",
+    targetId: "backend",
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  }
+];
+
+export async function getTests(projectId: string): Promise<Test[]> { return MOCK_TESTS.filter(t => t.projectId === projectId); }
+export async function getTestById(id: string): Promise<Test> { 
+  const p = MOCK_TESTS.find(x => x.id === id);
+  if (!p) throw new Error(`Test ${id} not found`);
+  
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem(`backendId_${id}`);
+    if (stored) {
+      p.backendId = stored;
+    }
+  }
+  return p;
+}
+export async function createTest(projectId: string, data: CreateTestRequest): Promise<Test> { 
+  const newTest: Test = {
+    id: `test-${Date.now()}`,
+    projectId,
+    name: data.name,
+    description: data.description || "",
+    status: "idle",
+    targetId: data.targetId || "backend",
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  MOCK_TESTS.push(newTest);
+  return newTest;
+}
+
+export async function runTest(id: string): Promise<void> { 
+  const test = await getTestById(id);
+  const platform = test.targetId.includes("android") ? "android" : (test.targetId.includes("frontend") ? "frontend" : "backend");
+
+  const durationStr = String(test.parameters?.duration || "30");
+  const valueStr = String(test.parameters?.value || "60");
+  const parsedDur = parseInt(durationStr.replace(/\D/g, "")) || 30;
+  const parsedVal = parseInt(valueStr.replace(/\D/g, "")) || 60;
+  
+  // If value was "3000", map to ~60 for backend intensity scaling
+  const mappedIntensity = parsedVal > 100 ? Math.round(parsedVal / 50) : parsedVal;
+
+  const startReq = {
+    FaultType: test.fault || "latency",
+    Targets: platform === "frontend" ? ["http://localhost:3000"] : (platform === "android" ? ["emulator-5554"] : ["failsafe-backend"]),
+    TargetType: platform === "frontend" ? "frontend" : (platform === "android" ? "android" : "docker"),
+      ObservedEndpoints: platform === "frontend" ? [] : (platform === "android" ? [] : ["http://127.0.0.1:8000/health"]),
+    Duration: parsedDur,
+    Adaptive: false,
+    MaxIntensity: mappedIntensity,
+  };
+
+  const res = await fetchAPI<{ id: string }>(`/experiments/${platform}/start`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(startReq),
   });
+
+  test.backendId = res.id;
+  if (typeof window !== "undefined") {
+    localStorage.setItem(`backendId_${id}`, res.id);
+  }
+  test.status = "running";
 }
 
-export async function testSlackNotification(): Promise<void> {
-  return fetchAPI<void>("/settings/slack/test", {
+export async function stopTest(id: string): Promise<void> { 
+  const test = await getTestById(id);
+  const platform = test.targetId.includes("android") ? "android" : (test.targetId.includes("frontend") ? "frontend" : "backend");
+  const backendId = test.backendId || id;
+
+  await fetchAPI<void>(`/experiments/${platform}/stop?id=${backendId}`, {
     method: "POST",
   });
+
+  test.status = "stopped";
 }
 
-export async function saveEmailSettings(data: EmailSettings): Promise<void> {
-  return fetchAPI<void>("/settings/email", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+export async function restartTest(id: string): Promise<void> { 
+  await stopTest(id);
+  await runTest(id);
 }
+export async function deleteTest(id: string): Promise<void> { throw new Error("Backend endpoint not yet available"); }
 
-export async function testEmailNotification(): Promise<void> {
-  return fetchAPI<void>("/settings/email/test", {
-    method: "POST",
-  });
-}
-
-// ============================================================================
-// SETTINGS - AUTH
-// ============================================================================
-
-export async function getSessions(): Promise<AuthSession[]> {
-  return fetchAPI<AuthSession[]>("/auth/sessions");
-}
-
-export async function revokeSession(id: string): Promise<void> {
-  return fetchAPI<void>(`/auth/sessions/${id}`, {
-    method: "DELETE",
-  });
-}
+export async function getEnvironments(projectId: string): Promise<any[]> { return []; }
+export async function createEnvironment(projectId: string, data?: any): Promise<any> { throw new Error("Backend endpoint not yet available"); }
+export async function updateEnvironment(id: string, data?: any): Promise<any> { throw new Error("Backend endpoint not yet available"); }
+export async function deleteEnvironment(id: string): Promise<void> { throw new Error("Backend endpoint not yet available"); }

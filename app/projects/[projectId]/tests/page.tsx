@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTests, useCreateTest, useRunTest, useDeleteTest } from "@/hooks";
 import { DataTable, StatusBadge, SkeletonTable } from "@/components/shared";
@@ -58,9 +58,9 @@ const TEMPLATES = [
 export default function TestsPage({
   params,
 }: {
-  params: Promise<{ projectId: string }>;
+  params: { projectId: string };
 }) {
-  const { projectId } = use(params);
+  const { projectId } = params;
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"create" | "existing">("create");
 

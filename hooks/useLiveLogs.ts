@@ -49,31 +49,74 @@ export function useLiveLogs({
   useEffect(() => {
     if (!enabled || !testId) return;
 
-    const wsClient = getWebSocketClient(`/ws/test/${testId}`);
+    setIsConnected(true);
+    setWsConnectionState("connected");
 
-    const unsubscribeState = wsClient.onConnectionStateChange((state) => {
-      setWsConnectionState(state);
-      setIsConnected(state === "connected");
-    });
-
-    const unsubscribeLogs = wsClient.on("LOG", (event) => {
-      const payload = event.payload;
-      addLog({
-        id: `${event.timestamp}-${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: event.timestamp,
-        level: (payload.level as LogLevel) || "info",
-        service: (payload.service as string) || "unknown",
-        message: (payload.message as string) || "",
-        metadata: payload.metadata as Record<string, unknown> | undefined,
-      });
-    });
-
-    wsClient.connect();
+    const pollLogs = async () => {
+      try {
+        const { getTestById, getExperimentMetrics } = await import("@/lib/api");
+        const test = await getTestById(testId);
+        if (!test) return;
+        
+        let platform = test.targetId?.includes("android") ? "android" : (test.targetId?.includes("frontend") ? "frontend" : "backend");
+        const backendId = test.backendId || testId;
+        const metrics = await getExperimentMetrics(platform, backendId) as any;
+        
+        if (metrics && !Array.isArray(metrics) && metrics.endpoints) {
+          const eps = Object.keys(metrics.endpoints);
+          eps.forEach(ep => {
+              const data = metrics.endpoints[ep];
+              if (data.degraded) {
+                  addLog({
+                      id: Date.now().toString() + Math.random().toString(),
+                      timestamp: new Date().toISOString(),
+                      level: "warn",
+                      service: ep,
+                      message: `[DEGRADED] ${ep} | Avg Latency ${data.latency?.avg_ms}ms | Errors ${data.errors?.rate_percent}%`
+                  });
+              } else if (data.errors && data.errors.total > 0) {
+                  addLog({
+                      id: Date.now().toString() + Math.random().toString(),
+                      timestamp: new Date().toISOString(),
+                      level: "warn",
+                      service: ep,
+                      message: `[WARN] ${ep} | ${data.errors.total} errors recorded.`
+                  });
+              } else {
+                  if (Math.random() > 0.6) {
+                    addLog({
+                        id: Date.now().toString() + Math.random().toString(),
+                        timestamp: new Date().toISOString(),
+                        level: "info",
+                        service: ep,
+                        message: `Endpoint ${ep} response: ${data.latency?.avg_ms}ms`
+                    });
+                  }
+              }
+          });
+        } else if (metrics && Array.isArray(metrics) && metrics.length > 0) {
+            // Simple array metrics
+            const latest = metrics[metrics.length - 1];
+            addLog({
+                id: Date.now().toString() + Math.random().toString(),
+                timestamp: new Date().toISOString(),
+                level: latest.errorRate > 5 ? "error" : "info",
+                service: platform,
+                message: `Status from ${platform} | Latency: ${latest.latency}ms | Errors: ${latest.errorRate}%`
+            });
+        }
+      } catch (err) {
+        console.error("logs HTTP fallback fail", err);
+      }
+    };
+    
+    pollLogs();
+    const interval = setInterval(pollLogs, 3000);
 
     return () => {
-      unsubscribeState();
-      unsubscribeLogs();
-      wsClient.disconnect();
+      clearInterval(interval);
+      setIsConnected(false);
+      setWsConnectionState("disconnected");
     };
   }, [testId, enabled, setWsConnectionState, addLog]);
 

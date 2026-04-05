@@ -35,8 +35,9 @@ export const MetricsChart = memo(function MetricsChart({
   className,
 }: MetricsChartProps) {
   const formatTimestamp = (value: unknown) => {
-    const timestamp = typeof value === "number" ? value : 0;
-    const date = new Date(timestamp);
+    if (!value) return "";
+    const date = typeof value === "number" || typeof value === "string" ? new Date(value) : new Date(0);
+    if (isNaN(date.getTime())) return "";
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",

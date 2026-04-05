@@ -5,7 +5,7 @@ import { Providers } from "@/components/providers";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
-import { CommandBar } from "@/components/layout/CommandBar";
+import { CommandBar } from "@/components/shared/CommandBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
